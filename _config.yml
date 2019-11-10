@@ -17,7 +17,7 @@ defaults:
       layout: "post"
 
 projects:
-  sort_by: pushed
+  sort_by: stars
   # sort_by options:
   #   - pushed
   #   - stars
@@ -26,33 +26,21 @@ projects:
     archived: false
     forks: true
     projects:
-    # - repo-name
+     - PTPv3
 
-# social_media:
-  # behance: your_username
-  # dribbble: your_username
-  # facebook: your_username
-  # hackerrank: your_username
-  # instagram: your_username
-  # keybase: your_username
-  # linkedin: your_username
-  # mastodon: your_username
-  # medium: your_username
-  # stackoverflow: your_user_id
-  # telegram: your_username
-  # twitter: your_username
-  # unsplash: your_username
-  # vk: your_username
-  # website: http://your_website_url
-  # youtube: your_username
+social_media:
+  linkedin: huntk
+  twitter: ctfkris
+  website: https://ctf.rip
 
 topics:
-  - name: CSS
-    web_url: https://github.com/topics/css
-    image_url: https://raw.githubusercontent.com/github/explore/6c6508f34230f0ac0d49e847a326429eefbfc030/topics/css/css.png
+  - name: Golang
+    web_url: https://golang.org/
+    image_url: https://i.imgur.com/FfCwhWR.png
 
-  - name: Web design
+  - name: CTF
+    web_url: https://ctftime.org
+    image_url: https://i.imgur.com/4vLlKgF.png
 
-  - name: Sass
-    web_url: https://github.com/topics/sass
-    image_url: https://raw.githubusercontent.com/github/explore/6c6508f34230f0ac0d49e847a326429eefbfc030/topics/sass/sass.png
+  - name: Security
+    image_url: https://i.imgur.com/89x3N31.png
