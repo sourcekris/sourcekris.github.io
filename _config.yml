@@ -17,7 +17,7 @@ defaults:
       layout: "post"
 
 projects:
-  sort_by: stars
+  sort_by: pushed
   # sort_by options:
   #   - pushed
   #   - stars
@@ -27,9 +27,11 @@ projects:
     forks: true
     projects:
      - PTPv3
+     - kali-postinstall
+     - LegalParse
 
 social_media:
-  linkedin: huntk
+  linkedin: sewid
   twitter: ctfkris
   website: https://ctf.rip
 
