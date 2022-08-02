@@ -16,12 +16,12 @@ minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt"
 
 # Site Settings
 locale                   : "en-US"
-title                    : "Site Title"
+title                    : "sewid.dev"
 title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
 name                     : "Kris Hunt"
 description              : "Blogworthy Security Rants"
-url                      : "https://sourcekris.github.io"
+url                      : "https://sewid.dev"
 baseurl                  : # the subpath of your site, e.g. "/blog"
 repository               : "sourcekris/sourcekris.github.io"
 teaser                   : # path of fallback teaser image, e.g. "/assets/images/500x300.png"
