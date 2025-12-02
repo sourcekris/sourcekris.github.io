@@ -70,6 +70,24 @@
             background: #d6d3d1;
             border-radius: 2px;
         }
+
+        /* Checklist Styling */
+        .checklist-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .checklist-item:hover {
+            background-color: #fafaf9;
+        }
+        .checklist-item.completed .check-circle {
+            background-color: #16a34a;
+            border-color: #16a34a;
+            color: white;
+        }
+        .checklist-item.completed .item-text {
+            text-decoration: line-through;
+            color: #a8a29e;
+        }
     </style>
     <!-- Chosen Palette: Warm Neutrals (Stone/Warm Gray) with subtle Green/Blue accents typical of Blue Mountains flora -->
     <!-- Application Structure Plan: 
@@ -78,10 +96,12 @@
         3. Visualization Section: Breakdown of costs (Pie) and Seasonal trends (Bar) to highlight the Blackheath winter spike.
         4. Detailed Itemization: Cards for Electricity, Gas, Water, Council Rates, Insurance. Each with deep-dive text and specific logic.
         5. Provider Strategy: Actionable advice on choosing retailers in the Endeavour Energy network.
+        6. Moving In Checklist: Task list for Utilities, NBN, Solar, and Data Cabling.
     -->
     <!-- Visualization & Content Choices:
         - Monthly Cost Composition (Doughnut Chart): Shows where the money goes. Interaction: Updates based on sliders.
         - Seasonal Cashflow (Bar Chart): Shows the drastic difference between Jan and July bills in Blackheath. Interaction: Recalculates based on Solar/Usage.
+        - Checklist: Interactive list for tracking tasks.
         - No SVG/Mermaid: All icons FontAwesome, all charts Chart.js.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
@@ -300,7 +320,7 @@
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h4 class="font-bold text-stone-900">NBN Internet</h4>
-                        <p class="text-xs text-stone-500">FTTN/FTTP</p>
+                        <p class="text-xs text-stone-500">FTTP Available</p>
                     </div>
                     <div class="bg-purple-100 p-2 rounded-full text-purple-600">
                         <i class="fas fa-wifi"></i>
@@ -308,39 +328,169 @@
                 </div>
                 <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="internetCost">80</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
                 <p class="text-sm text-stone-600 mb-4">
-                    Standard 50/20Mbps plan. 100Mbps plans avail for ~$99.
+                    Budgeting for basic NBN. Upgrade to Gigabit plans (~$130/mo) available via FTTP.
                 </p>
             </div>
         </div>
 
-        <!-- Strategy Section -->
-        <section class="mt-8 bg-white p-6 rounded-xl shadow-sm">
-            <h3 class="text-xl font-bold text-stone-800 mb-4">Action Plan for 18 Forest Park Rd</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                    <h4 class="font-semibold text-stone-700 mb-2"><i class="fas fa-search-dollar mr-2 text-green-600"></i>Choosing an Energy Provider</h4>
-                    <p class="text-sm text-stone-600 mb-3">
-                        Blackheath is in the <strong>Endeavour Energy</strong> distribution zone. You cannot choose your distributor, but you can choose your retailer.
-                    </p>
-                    <ul class="text-sm text-stone-600 space-y-2 list-disc pl-5">
-                        <li><strong>Comparision Tool:</strong> Use the government site <a href="#" class="text-blue-600 hover:underline">Energy Made Easy</a> (upload your data file once you have a few bills).</li>
-                        <li><strong>Top Value Retailers (Current Market):</strong> Often Globird, Red Energy, or OVO Energy offer competitive rates in this zone.</li>
-                        <li><strong>Solar Fit:</strong> When you get solar, prioritize a retailer with a decent Feed-in-Tariff (FiT), though most are now low (~5c/kWh). Focus on self-consumption.</li>
-                    </ul>
+        <!-- Action Plan / Checklist -->
+        <h2 class="text-xl font-bold text-stone-800 mt-12 mb-4 border-b pb-2 border-stone-300">Moving In & Infrastructure Checklist</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <!-- Column 1: Utilities & Connections -->
+            <div class="space-y-6">
+                <!-- Utilities -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                        <i class="fas fa-plug text-yellow-500 mr-2"></i> 1. Essentials Connection
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Connect Electricity</div>
+                                <div class="text-xs text-stone-500">Provider of choice (e.g., Red, OVO, Globird). Check for "Time of Use" tariffs.</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Connect Gas</div>
+                                <div class="text-xs text-stone-500">Often cheaper to bundle with electricity. Ensure heating is ready for winter.</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Notify Sydney Water</div>
+                                <div class="text-xs text-stone-500">Usually handled by conveyancer, but double check account setup.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h4 class="font-semibold text-stone-700 mb-2"><i class="fas fa-leaf mr-2 text-green-600"></i>The Solar Opportunity</h4>
-                    <p class="text-sm text-stone-600 mb-3">
-                        With 162m² of roof space (assuming typical layout), you have ample room for a 6.6kW or 10kW system.
-                    </p>
-                    <ul class="text-sm text-stone-600 space-y-2 list-disc pl-5">
-                        <li><strong>ROI:</strong> Typical payback period in NSW is 3-5 years.</li>
-                        <li><strong>Impact:</strong> A 6.6kW system generates ~20-25 kWh/day on average. In Blackheath, winter generation drops due to cloud cover/fog, so don't rely on it 100% for winter heating.</li>
-                        <li><strong>Battery:</strong> Consider a battery later, but start with panels to offset daytime usage.</li>
-                    </ul>
+
+                <!-- NBN -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                        <i class="fas fa-tachometer-alt text-purple-500 mr-2"></i> 2. High Speed NBN (FTTP)
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Order 1000/50 Mbps Plan</div>
+                                <div class="text-xs text-stone-500">Rec: Aussie Broadband or Superloop. Ensure activation date aligns with move-in.</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Upgrade Router Hardware</div>
+                                <div class="text-xs text-stone-500">Essential: You need a router with high WAN-to-LAN throughput (e.g., Ubiquiti Dream Machine, ASUS RT-AX86U) to actually see 1Gbps speeds.</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Column 2: Infrastructure Projects -->
+            <div class="space-y-6">
+                <!-- Solar -->
+                <div class="card p-6 border-l-4 border-green-400">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                        <i class="fas fa-solar-panel text-green-500 mr-2"></i> 3. Solar + Battery Project
+                    </h3>
+                    <div class="bg-yellow-50 p-3 rounded mb-3 text-xs text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> <strong>Dependency:</strong> Roof work MUST happen before solar installation.
+                    </div>
+                    <div class="space-y-3">
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Step 1: Roof Restoration</div>
+                                <div class="text-xs text-stone-500">Hire roofer for cleaning + tile repairs (per building report). Ensure structural integrity for panels.</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Step 2: Get 3x Solar Quotes</div>
+                                <div class="text-xs text-stone-500">Target: 6.6kW - 10kW PV + 10-13kWh Battery (e.g., Tesla Powerwall 2 or Sungrow).</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Step 3: Installation</div>
+                                <div class="text-xs text-stone-500">Coordinate ASAP after roof repairs.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cabling -->
+                <div class="card p-6 border-l-4 border-blue-400">
+                    <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                        <i class="fas fa-network-wired text-blue-500 mr-2"></i> 4. Smart Home Cabling
+                    </h3>
+                    <p class="text-xs text-stone-500 mb-3">Goal: Convert Coax to Ethernet & Centralize in Study Wardrobe.</p>
+                    <div class="space-y-3">
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Procure Hardware</div>
+                                <div class="text-xs text-stone-500">
+                                    - 10" Mini Rack (w/ fans for wardrobe)<br>
+                                    - 12-24 Port Patch Panel<br>
+                                    - Cat6 or Cat6a Cable (Solid Core)<br>
+                                    - RJ45 Keystone Jacks & Wall Plates
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Engage Registered Cabler</div>
+                                <div class="text-xs text-stone-500"><strong>Legal Requirement:</strong> In-wall cabling MUST be done by a licensed pro.</div>
+                            </div>
+                        </div>
+                        <div class="checklist-item flex items-start p-2 rounded cursor-pointer" onclick="toggleCheck(this)">
+                            <div class="check-circle w-6 h-6 rounded-full border-2 border-stone-300 flex items-center justify-center mr-3 bg-white flex-shrink-0">
+                                <i class="fas fa-check text-xs text-white"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-stone-800 item-text">Execute Re-Cabling</div>
+                                <div class="text-xs text-stone-500">
+                                    1. Pull old Coax, replace with Cat6.<br>
+                                    2. Reroute 5x PoE Camera lines from Living -> Study.<br>
+                                    3. Terminate all to Study Patch Panel.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </main>
 
@@ -372,13 +522,13 @@
         };
 
         let state = {
-            people: 2, // Updated default to 2
+            people: 2, // Default 2 people
             hasSolar: false
         };
 
         // --- DOM Elements ---
         const slider = document.getElementById('usageSlider');
-        const peopleDisplay = document.getElementById('peopleDisplay'); // New element ref
+        const peopleDisplay = document.getElementById('peopleDisplay');
         const solarToggle = document.getElementById('solarToggle');
         const totalDisplay = document.getElementById('totalMonthlyCost');
         
@@ -501,7 +651,7 @@
             const total = Object.values(costs).reduce((a, b) => a + b, 0);
 
             // Update Text
-            peopleDisplay.textContent = state.people; // Update label
+            peopleDisplay.textContent = state.people;
             totalDisplay.textContent = total;
             costEls.elec.textContent = costs.elec;
             costEls.gas.textContent = costs.gas;
@@ -551,9 +701,16 @@
             };
         }
 
+        // --- Interaction Logic ---
+
+        // Checklist toggle function
+        function toggleCheck(element) {
+            element.classList.toggle('completed');
+        }
+
         // --- Event Listeners ---
         slider.addEventListener('input', (e) => {
-            state.people = parseInt(e.target.value); // Parse as int
+            state.people = parseInt(e.target.value);
             updateUI();
         });
 
