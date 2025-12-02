@@ -123,13 +123,16 @@
                 
                 <!-- Household Size Slider -->
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-stone-700 mb-1">Household Intensity</label>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">Number of Occupants</label>
                     <div class="flex justify-between text-xs text-stone-500 mb-2">
-                        <span>Conservative</span>
-                        <span>Average (4 ppl)</span>
-                        <span>High Usage</span>
+                        <span>1 Person</span>
+                        <span class="font-bold text-stone-800">2 People</span>
+                        <span>4+ People</span>
                     </div>
-                    <input type="range" min="0.8" max="1.4" step="0.1" value="1.0" id="usageSlider" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                    <input type="range" min="1" max="6" step="1" value="2" id="usageSlider" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="text-center mt-2 text-sm text-stone-600 font-medium">
+                        Simulating: <span id="peopleDisplay">2</span> People
+                    </div>
                 </div>
 
                 <!-- Solar Toggle -->
@@ -344,12 +347,23 @@
     <script>
         // --- Data & State Management ---
         const baseCosts = {
-            electricity: 180, // Monthly avg base
-            gas: 120,        // Monthly avg base (blended)
-            water: 95,       // Fixed + Usage
-            rates: 245,      // Council Rates
-            insurance: 250,  // Bushfire prone
-            internet: 80
+            electricity: 180, // Monthly avg base (Reference for 4 people)
+            gas: 120,        // Monthly avg base (Reference for 4 people)
+            water: 95,       // Fixed + Usage (Reference for 4 people)
+            rates: 245,      // Council Rates (Fixed)
+            insurance: 250,  // Bushfire prone (Fixed)
+            internet: 80     // Fixed
+        };
+
+        // Usage Curve: Economies of scale. 
+        // 2 people is not 50% of 4 people cost, closer to 70-75% due to fixed supply charges and shared heating/cooling.
+        const consumptionCurve = {
+            1: 0.60,
+            2: 0.75, 
+            3: 0.88,
+            4: 1.00,
+            5: 1.15,
+            6: 1.30
         };
 
         const seasonalFactors = {
@@ -358,12 +372,13 @@
         };
 
         let state = {
-            usageIntensity: 1.0,
+            people: 2, // Updated default to 2
             hasSolar: false
         };
 
         // --- DOM Elements ---
         const slider = document.getElementById('usageSlider');
+        const peopleDisplay = document.getElementById('peopleDisplay'); // New element ref
         const solarToggle = document.getElementById('solarToggle');
         const totalDisplay = document.getElementById('totalMonthlyCost');
         
@@ -452,10 +467,19 @@
         // --- Logic & Updates ---
 
         function calculateCosts() {
-            // Apply Usage Intensity
-            let elec = baseCosts.electricity * state.usageIntensity;
-            let gas = baseCosts.gas * state.usageIntensity;
-            let water = baseCosts.water * ((state.usageIntensity - 1) * 0.5 + 1); // Water scales less aggressively
+            // Get multiplier based on people count
+            const multiplier = consumptionCurve[state.people] || 1.0;
+
+            // Apply Multiplier to variable costs
+            let elec = baseCosts.electricity * multiplier;
+            let gas = baseCosts.gas * multiplier;
+            
+            // Water usage scales, but fixed service charge (~$60/mo) does not. 
+            // We approximate this by scaling only a portion of the water bill.
+            // Approx split: 60% Fixed / 40% Usage
+            const waterFixed = baseCosts.water * 0.6;
+            const waterVariable = baseCosts.water * 0.4 * multiplier;
+            let water = waterFixed + waterVariable;
 
             // Apply Solar Savings (Estimated 40% reduction on Elec avg, less in winter, more in summer)
             // Note: Solar doesn't affect Gas or Fixed costs
@@ -477,6 +501,7 @@
             const total = Object.values(costs).reduce((a, b) => a + b, 0);
 
             // Update Text
+            peopleDisplay.textContent = state.people; // Update label
             totalDisplay.textContent = total;
             costEls.elec.textContent = costs.elec;
             costEls.gas.textContent = costs.gas;
@@ -528,7 +553,7 @@
 
         // --- Event Listeners ---
         slider.addEventListener('input', (e) => {
-            state.usageIntensity = parseFloat(e.target.value);
+            state.people = parseInt(e.target.value); // Parse as int
             updateUI();
         });
 
