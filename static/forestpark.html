@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18 Forest Park Rd - Running Cost Estimator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* Stone-100 */
+            color: #1c1917; /* Stone-900 */
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #4ade80;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #4ade80;
+        }
+        
+        /* Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none; 
+            background: transparent; 
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #57534e; /* Stone-600 */
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #d6d3d1;
+            border-radius: 2px;
+        }
+    </style>
+    <!-- Chosen Palette: Warm Neutrals (Stone/Warm Gray) with subtle Green/Blue accents typical of Blue Mountains flora -->
+    <!-- Application Structure Plan: 
+        1. Header: Contextual property info.
+        2. Executive Dashboard: Top-level monthly cost summary + Interactive controls (Season, Household Size, Solar).
+        3. Visualization Section: Breakdown of costs (Pie) and Seasonal trends (Bar) to highlight the Blackheath winter spike.
+        4. Detailed Itemization: Cards for Electricity, Gas, Water, Council Rates, Insurance. Each with deep-dive text and specific logic.
+        5. Provider Strategy: Actionable advice on choosing retailers in the Endeavour Energy network.
+    -->
+    <!-- Visualization & Content Choices:
+        - Monthly Cost Composition (Doughnut Chart): Shows where the money goes. Interaction: Updates based on sliders.
+        - Seasonal Cashflow (Bar Chart): Shows the drastic difference between Jan and July bills in Blackheath. Interaction: Recalculates based on Solar/Usage.
+        - No SVG/Mermaid: All icons FontAwesome, all charts Chart.js.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-stone-100 min-h-screen pb-12">
+
+    <!-- Navigation / Header -->
+    <header class="bg-white border-b border-stone-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-tree text-stone-600 text-xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-stone-800">Blackheath Property Estimator</h1>
+                </div>
+                <div class="text-sm text-stone-500 hidden sm:block">
+                    18 Forest Park Rd, Blackheath NSW
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Intro Section -->
+        <section class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-stone-500">
+            <h2 class="text-lg font-semibold text-stone-800 mb-2">Welcome to your Financial Forecast</h2>
+            <p class="text-stone-600 leading-relaxed">
+                Purchasing a home in the Blue Mountains comes with unique financial considerations. The cool climate significantly impacts energy consumption, while the bushfire-prone location affects insurance premiums. This interactive dashboard estimates your running costs based on local rates (Endeavour Energy network, Sydney Water, Blue Mountains City Council) and adjusts for seasonality. Use the controls below to simulate your specific usage scenario.
+            </p>
+        </section>
+
+        <!-- Interactive Control Panel & High Level Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Controls -->
+            <div class="card p-6 lg:col-span-1 border border-stone-200">
+                <h3 class="text-lg font-semibold text-stone-800 mb-4 flex items-center">
+                    <i class="fas fa-sliders-h mr-2 text-stone-500"></i> Simulation Controls
+                </h3>
+                
+                <!-- Household Size Slider -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-stone-700 mb-1">Household Intensity</label>
+                    <div class="flex justify-between text-xs text-stone-500 mb-2">
+                        <span>Conservative</span>
+                        <span>Average (4 ppl)</span>
+                        <span>High Usage</span>
+                    </div>
+                    <input type="range" min="0.8" max="1.4" step="0.1" value="1.0" id="usageSlider" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                </div>
+
+                <!-- Solar Toggle -->
+                <div class="mb-6 flex items-center justify-between p-3 bg-stone-50 rounded-lg border border-stone-200">
+                    <div>
+                        <span class="block text-sm font-medium text-stone-800">Future Solar System</span>
+                        <span class="text-xs text-stone-500">Simulate 6.6kW Install</span>
+                    </div>
+                    <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                        <input type="checkbox" name="toggle" id="solarToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer border-stone-300"/>
+                        <label for="solarToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-stone-300 cursor-pointer"></label>
+                    </div>
+                </div>
+
+                <!-- Season Display -->
+                <div class="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <div class="flex items-center text-blue-800 text-sm">
+                        <i class="fas fa-snowflake mr-2"></i>
+                        <span><strong>Note:</strong> Estimates account for heating spikes in Winter (Jun-Aug). Blackheath heating costs can be 3x summer costs.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Big Number Display -->
+            <div class="card p-6 lg:col-span-2 flex flex-col justify-center items-center bg-stone-800 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-32 bg-stone-700 rounded-full mix-blend-overlay filter blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2"></div>
+                
+                <h3 class="text-stone-300 text-sm uppercase tracking-wider mb-2">Estimated Monthly Average Bill</h3>
+                <div class="flex items-baseline">
+                    <span class="text-2xl font-light text-stone-400 mr-1">$</span>
+                    <span id="totalMonthlyCost" class="text-6xl font-bold tracking-tight">0</span>
+                </div>
+                <div class="mt-4 flex space-x-6 text-sm text-stone-400">
+                    <span class="flex items-center"><i class="fas fa-bolt mr-2 text-yellow-400"></i> Energy Heavy</span>
+                    <span class="flex items-center"><i class="fas fa-file-invoice-dollar mr-2 text-green-400"></i> Rates Included</span>
+                </div>
+                <p class="mt-6 text-stone-500 text-xs max-w-md text-center">
+                    *Includes Electricity, Gas, Water, Council Rates, Internet, and estimated Home Insurance.
+                </p>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Cost Breakdown -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-stone-800 mb-2">Where is the money going?</h3>
+                <p class="text-sm text-stone-500 mb-4">Breakdown of the estimated monthly expenditure.</p>
+                <div class="chart-container">
+                    <canvas id="breakdownChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Seasonal Trend -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-stone-800 mb-2">The "Blackheath Factor"</h3>
+                <p class="text-sm text-stone-500 mb-4">Projected monthly energy costs across the year.</p>
+                <div class="chart-container">
+                    <canvas id="seasonalChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Itemization Grid -->
+        <h2 class="text-xl font-bold text-stone-800 mt-8 mb-4 border-b pb-2 border-stone-300">Detailed Cost Analysis</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            
+            <!-- Electricity Card -->
+            <div class="card p-5 border-t-4 border-yellow-500 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">Electricity</h4>
+                        <p class="text-xs text-stone-500">Endeavour Energy Network</p>
+                    </div>
+                    <div class="bg-yellow-100 p-2 rounded-full text-yellow-600">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="elecCost">0</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    Based on ~18-22 kWh/day (4 bed). Rates approx 32c/kWh + 105c daily supply. 
+                </p>
+                <div class="bg-stone-50 p-3 rounded text-xs text-stone-600">
+                    <strong>Provider Tip:</strong> Look for 'Time of Use' plans if you can shift usage to off-peak (10pm-7am). Major providers: Red Energy, Origin, AGL.
+                </div>
+            </div>
+
+            <!-- Gas Card -->
+            <div class="card p-5 border-t-4 border-orange-500 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">Natural Gas</h4>
+                        <p class="text-xs text-stone-500">Heating Essential</p>
+                    </div>
+                    <div class="bg-orange-100 p-2 rounded-full text-orange-600">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="gasCost">0</span><span class="text-sm font-normal text-stone-500">/mo avg</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    Highly seasonal. Winter bills can exceed $300/mo due to heating. Summer bills are mostly hot water/cooking (~$50).
+                </p>
+                <div class="bg-stone-50 p-3 rounded text-xs text-stone-600">
+                    <strong>Insight:</strong> If you don't have gas heating, add $100-$150 to the Electricity estimate during winter.
+                </div>
+            </div>
+
+            <!-- Council Rates Card -->
+            <div class="card p-5 border-t-4 border-green-600 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">Council Rates</h4>
+                        <p class="text-xs text-stone-500">Blue Mountains City Council</p>
+                    </div>
+                    <div class="bg-green-100 p-2 rounded-full text-green-600">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="ratesCost">245</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    Estimated on $1,100m² land value. Annual rates approx $2,800 - $3,000 (Residential Category).
+                </p>
+                <div class="bg-stone-50 p-3 rounded text-xs text-stone-600">
+                    Includes domestic waste management service. Paid quarterly or annually.
+                </div>
+            </div>
+
+            <!-- Water Card -->
+            <div class="card p-5 border-t-4 border-blue-500 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">Water & Sewer</h4>
+                        <p class="text-xs text-stone-500">Sydney Water</p>
+                    </div>
+                    <div class="bg-blue-100 p-2 rounded-full text-blue-600">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="waterCost">95</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    Fixed charges ~$180/qtr (Water+Sewer). Usage ~$2.60/kL. Average quarterly bill ~$280.
+                </p>
+            </div>
+
+            <!-- Insurance Card (Critical) -->
+            <div class="card p-5 border-t-4 border-red-500 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">Home Insurance</h4>
+                        <p class="text-xs text-stone-500">High Bushfire Risk</p>
+                    </div>
+                    <div class="bg-red-100 p-2 rounded-full text-red-600">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="insuranceCost">250</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    <strong>Critical Cost:</strong> Blackheath is often BAL-29 or BAL-40 zone. Premiums are significantly higher than Sydney average.
+                </p>
+            </div>
+
+            <!-- Internet Card -->
+            <div class="card p-5 border-t-4 border-purple-500 hover:shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <h4 class="font-bold text-stone-900">NBN Internet</h4>
+                        <p class="text-xs text-stone-500">FTTN/FTTP</p>
+                    </div>
+                    <div class="bg-purple-100 p-2 rounded-full text-purple-600">
+                        <i class="fas fa-wifi"></i>
+                    </div>
+                </div>
+                <div class="text-2xl font-bold text-stone-800 mb-2">$<span id="internetCost">80</span><span class="text-sm font-normal text-stone-500">/mo</span></div>
+                <p class="text-sm text-stone-600 mb-4">
+                    Standard 50/20Mbps plan. 100Mbps plans avail for ~$99.
+                </p>
+            </div>
+        </div>
+
+        <!-- Strategy Section -->
+        <section class="mt-8 bg-white p-6 rounded-xl shadow-sm">
+            <h3 class="text-xl font-bold text-stone-800 mb-4">Action Plan for 18 Forest Park Rd</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h4 class="font-semibold text-stone-700 mb-2"><i class="fas fa-search-dollar mr-2 text-green-600"></i>Choosing an Energy Provider</h4>
+                    <p class="text-sm text-stone-600 mb-3">
+                        Blackheath is in the <strong>Endeavour Energy</strong> distribution zone. You cannot choose your distributor, but you can choose your retailer.
+                    </p>
+                    <ul class="text-sm text-stone-600 space-y-2 list-disc pl-5">
+                        <li><strong>Comparision Tool:</strong> Use the government site <a href="#" class="text-blue-600 hover:underline">Energy Made Easy</a> (upload your data file once you have a few bills).</li>
+                        <li><strong>Top Value Retailers (Current Market):</strong> Often Globird, Red Energy, or OVO Energy offer competitive rates in this zone.</li>
+                        <li><strong>Solar Fit:</strong> When you get solar, prioritize a retailer with a decent Feed-in-Tariff (FiT), though most are now low (~5c/kWh). Focus on self-consumption.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-stone-700 mb-2"><i class="fas fa-leaf mr-2 text-green-600"></i>The Solar Opportunity</h4>
+                    <p class="text-sm text-stone-600 mb-3">
+                        With 162m² of roof space (assuming typical layout), you have ample room for a 6.6kW or 10kW system.
+                    </p>
+                    <ul class="text-sm text-stone-600 space-y-2 list-disc pl-5">
+                        <li><strong>ROI:</strong> Typical payback period in NSW is 3-5 years.</li>
+                        <li><strong>Impact:</strong> A 6.6kW system generates ~20-25 kWh/day on average. In Blackheath, winter generation drops due to cloud cover/fog, so don't rely on it 100% for winter heating.</li>
+                        <li><strong>Battery:</strong> Consider a battery later, but start with panels to offset daytime usage.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Data & State Management ---
+        const baseCosts = {
+            electricity: 180, // Monthly avg base
+            gas: 120,        // Monthly avg base (blended)
+            water: 95,       // Fixed + Usage
+            rates: 245,      // Council Rates
+            insurance: 250,  // Bushfire prone
+            internet: 80
+        };
+
+        const seasonalFactors = {
+            electricity: [1.0, 1.0, 1.1, 1.3, 1.8, 2.2, 2.3, 2.0, 1.4, 1.1, 1.0, 1.0], // Jan to Dec (Peak Jul)
+            gas: [0.4, 0.4, 0.6, 1.2, 2.5, 3.5, 3.8, 3.2, 1.8, 0.8, 0.5, 0.4] // Massive winter spike
+        };
+
+        let state = {
+            usageIntensity: 1.0,
+            hasSolar: false
+        };
+
+        // --- DOM Elements ---
+        const slider = document.getElementById('usageSlider');
+        const solarToggle = document.getElementById('solarToggle');
+        const totalDisplay = document.getElementById('totalMonthlyCost');
+        
+        const costEls = {
+            elec: document.getElementById('elecCost'),
+            gas: document.getElementById('gasCost'),
+            rates: document.getElementById('ratesCost'),
+            water: document.getElementById('waterCost'),
+            insurance: document.getElementById('insuranceCost'),
+            internet: document.getElementById('internetCost')
+        };
+
+        // --- Charts Initialization ---
+        let breakdownChartInstance = null;
+        let seasonalChartInstance = null;
+
+        function initCharts() {
+            // Doughnut Chart
+            const ctxBreakdown = document.getElementById('breakdownChart').getContext('2d');
+            breakdownChartInstance = new Chart(ctxBreakdown, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Electricity', 'Gas', 'Rates', 'Water', 'Insurance', 'Internet'],
+                    datasets: [{
+                        data: [0,0,0,0,0,0],
+                        backgroundColor: [
+                            '#eab308', // Yellow (Elec)
+                            '#f97316', // Orange (Gas)
+                            '#16a34a', // Green (Rates)
+                            '#3b82f6', // Blue (Water)
+                            '#ef4444', // Red (Insurance)
+                            '#a855f7'  // Purple (Net)
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Bar Chart
+            const ctxSeasonal = document.getElementById('seasonalChart').getContext('2d');
+            seasonalChartInstance = new Chart(ctxSeasonal, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Electricity',
+                            data: [],
+                            backgroundColor: '#eab308',
+                            stack: 'Stack 0',
+                        },
+                        {
+                            label: 'Gas',
+                            data: [],
+                            backgroundColor: '#f97316',
+                            stack: 'Stack 0',
+                        },
+                        {
+                            label: 'Fixed Costs',
+                            data: [],
+                            backgroundColor: '#78716c',
+                            stack: 'Stack 0',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Est. Monthly Bill ($)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Logic & Updates ---
+
+        function calculateCosts() {
+            // Apply Usage Intensity
+            let elec = baseCosts.electricity * state.usageIntensity;
+            let gas = baseCosts.gas * state.usageIntensity;
+            let water = baseCosts.water * ((state.usageIntensity - 1) * 0.5 + 1); // Water scales less aggressively
+
+            // Apply Solar Savings (Estimated 40% reduction on Elec avg, less in winter, more in summer)
+            // Note: Solar doesn't affect Gas or Fixed costs
+            let solarFactor = state.hasSolar ? 0.6 : 1.0; 
+            elec = elec * solarFactor;
+
+            return {
+                elec: Math.round(elec),
+                gas: Math.round(gas),
+                water: Math.round(water),
+                rates: baseCosts.rates,
+                insurance: baseCosts.insurance,
+                internet: baseCosts.internet
+            };
+        }
+
+        function updateUI() {
+            const costs = calculateCosts();
+            const total = Object.values(costs).reduce((a, b) => a + b, 0);
+
+            // Update Text
+            totalDisplay.textContent = total;
+            costEls.elec.textContent = costs.elec;
+            costEls.gas.textContent = costs.gas;
+            costEls.rates.textContent = costs.rates;
+            costEls.water.textContent = costs.water;
+            costEls.insurance.textContent = costs.insurance;
+            costEls.internet.textContent = costs.internet;
+
+            // Update Breakdown Chart
+            breakdownChartInstance.data.datasets[0].data = [
+                costs.elec, costs.gas, costs.rates, costs.water, costs.insurance, costs.internet
+            ];
+            breakdownChartInstance.update();
+
+            // Calculate Seasonal Data
+            const seasonalData = generateSeasonalData(costs);
+            seasonalChartInstance.data.datasets[0].data = seasonalData.elec;
+            seasonalChartInstance.data.datasets[1].data = seasonalData.gas;
+            seasonalChartInstance.data.datasets[2].data = seasonalData.fixed;
+            seasonalChartInstance.update();
+        }
+
+        function generateSeasonalData(avgCosts) {
+            // We need to reverse-engineer the "Average" monthly cost into a seasonal curve
+            // The baseCosts.electricity is the Average over 12 months.
+            // We distribute this average based on the seasonalFactors array.
+            
+            // 1. Calculate sum of factors
+            const sumElecFactors = seasonalFactors.electricity.reduce((a,b)=>a+b,0);
+            const sumGasFactors = seasonalFactors.gas.reduce((a,b)=>a+b,0);
+
+            // 2. Determine "Base Unit" cost
+            // Annual Cost = Avg * 12
+            // Base Unit = Annual Cost / SumFactors
+            const annualElec = avgCosts.elec * 12;
+            const unitElec = annualElec / sumElecFactors;
+
+            const annualGas = avgCosts.gas * 12;
+            const unitGas = annualGas / sumGasFactors;
+
+            const fixedMonthly = avgCosts.rates + avgCosts.water + avgCosts.insurance + avgCosts.internet;
+
+            return {
+                elec: seasonalFactors.electricity.map(f => Math.round(f * unitElec)),
+                gas: seasonalFactors.gas.map(f => Math.round(f * unitGas)),
+                fixed: Array(12).fill(fixedMonthly)
+            };
+        }
+
+        // --- Event Listeners ---
+        slider.addEventListener('input', (e) => {
+            state.usageIntensity = parseFloat(e.target.value);
+            updateUI();
+        });
+
+        solarToggle.addEventListener('change', (e) => {
+            state.hasSolar = e.target.checked;
+            updateUI();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updateUI();
+        });
+
+    </script>
+</body>
+</html>
